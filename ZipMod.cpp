@@ -82,7 +82,7 @@ bool ZipMod::walk_dir(const std::string& startdir, const std::string& inputdir, 
 }
 
 
-void ZipMod::zipDirectory(String _input_dir, String _output_dir)
+bool ZipMod::zipDirectory(String _input_dir, String _output_dir)
 {
 
 	const char* input_dir = _input_dir.alloc_c_string();
@@ -98,19 +98,19 @@ void ZipMod::zipDirectory(String _input_dir, String _output_dir)
 		zip_error_init_with_code(&error, err);
 		std::string f = std::format("Cannot open zip archive {} : {}", output_dir, zip_error_strerror(&error));
 		Godot::print(f.c_str());
-		return;
+		return false;
 	}
 
 	if (not walk_dir(input_dir, input_dir, zipper)) {
 		//Godot::print_error("[YHMA] Failed to zip directory", "ZipMod::zipDirectory", "ZipMod.cpp", 102);
 		zip_discard(zipper);
 		Godot::print("[YHMA] Failed to zip");
-		return;
+		return false;
 	}
 
 	Godot::print("[YHMA] Mod Has Been Zipped");
 	zip_close(zipper);
-
+	return true;
 }
 
 
