@@ -35,11 +35,6 @@ void ZipMod::_init()
 bool ZipMod::is_dir(const std::string& dir) 
 {
 	return std::filesystem::is_directory(dir);
-	/*struct stat st;
-	::stat(dir.c_str(), &st);
-	Godot::print(dir.c_str());
-	Godot::print(std::format("{}", st.st_mode && S_IFDIR).c_str());
-	return (st.st_mode && S_IFDIR);*/
 }
 
 bool ZipMod::walk_dir(const std::string& startdir, const std::string& inputdir, zip_t* zipper)
@@ -87,75 +82,31 @@ bool ZipMod::walk_dir(const std::string& startdir, const std::string& inputdir, 
 }
 
 
-static void _walk_directory(const std::string& startdir, const std::string& inputdir, zip_t* zipper)
-{
-	DIR* dp = ::opendir(inputdir.c_str());
-	if (dp == nullptr) {
-		throw std::runtime_error("Failed to open input directory: " + std::string(::strerror(errno)));
-	}
-
-	struct dirent* dirp;
-	while ((dirp = readdir(dp)) != NULL) {
-		if (dirp->d_name != std::string(".") && dirp->d_name != std::string("..")) {
-			std::string fullname = inputdir + "/" + dirp->d_name;
-			if (ZipMod::is_dir(fullname)) {
-				if (zip_dir_add(zipper, fullname.substr(startdir.length() + 1).c_str(), ZIP_FL_ENC_UTF_8) < 0) {
-					throw std::runtime_error("Failed to add directory to zip: " + std::string(zip_strerror(zipper)));
-				}
-				_walk_directory(startdir, fullname, zipper);
-			}
-			else {
-				zip_source_t* source = zip_source_file(zipper, fullname.c_str(), 0, 0);
-				if (source == nullptr) {
-					throw std::runtime_error("Failed to add file to zip: " + std::string(zip_strerror(zipper)));
-				}
-				if (zip_file_add(zipper, fullname.substr(startdir.length() + 1).c_str(), source, ZIP_FL_ENC_UTF_8) < 0) {
-					zip_source_free(source);
-					throw std::runtime_error("Failed to add file to zip: " + std::string(zip_strerror(zipper)));
-				}
-			}
-		}
-	}
-	::closedir(dp);
-}
-
-
-
-//TODO FIGURE THIS SHIT OUT
 void ZipMod::zipDirectory(String _input_dir, String _output_dir)
 {
-	std::string input_dir = _input_dir.ascii().get_data();
-	std::string output_dir = _output_dir.ascii().get_data();
 
+	const char* input_dir = _input_dir.alloc_c_string();
+	const char* output_dir = _output_dir.alloc_c_string();
 
 	int err;
-	zip_t* zipper = zip_open(output_dir.c_str(), ZIP_TRUNCATE | ZIP_CREATE, &err);
+	zip_t* zipper = zip_open(output_dir, ZIP_TRUNCATE | ZIP_CREATE, &err);
 
-	Godot::print(std::format("{}", is_dir(input_dir)).c_str());
+	//Godot::print(std::format("{}", is_dir(input_dir)).c_str());
 
-	/*if (zipper == NULL) {
+	if (zipper == NULL) {
 		zip_error_t error;
 		zip_error_init_with_code(&error, err);
-		String f = std::format("Cannot open zip archive {} : {}", output_dir, zip_error_strerror(&error)).c_str();
-		Godot::print(f);
+		std::string f = std::format("Cannot open zip archive {} : {}", output_dir, zip_error_strerror(&error));
+		Godot::print(f.c_str());
 		return;
-	}*/
+	}
 
 	if (not walk_dir(input_dir, input_dir, zipper)) {
 		//Godot::print_error("[YHMA] Failed to zip directory", "ZipMod::zipDirectory", "ZipMod.cpp", 102);
 		zip_discard(zipper);
-		Godot::print("DIED HERE");
+		Godot::print("[YHMA] Failed to zip");
 		return;
 	}
-
-	/*try {
-		_walk_directory(input_dir, input_dir, zipper);
-	}
-	catch (...) {
-		zip_discard(zipper); 
-		Godot::print("DIED HERE");
-		return;
-	}*/
 
 	Godot::print("[YHMA] Mod Has Been Zipped");
 	zip_close(zipper);
