@@ -56,8 +56,8 @@ bool ZipMod::walk_dir(const std::string& startdir, const std::string& inputdir, 
 			std::string fullname = inputdir + "/" + dirp->d_name;
 			if (is_dir(fullname)) {
 				if (zip_dir_add(zipper, std::string(mod_folder + "/" + fullname.substr(startdir.length() + 1)).c_str(), ZIP_FL_ENC_UTF_8) < 0) {
-					//throw std::runtime_error("[YHMA] Failed to add subdirectory to zip: " + std::string(zip_strerror(zipper)));
-					Godot::print_error("[YHMA] Failed to add subdirectory to zip",
+					std::string s = std::format("[YHMA] Failed to add subdirectory to zip: {}" + std::string(zip_strerror(zipper)));
+					Godot::print_error(s.c_str(),
 						"ZipMod::walk_dir", "ZipMod.cpp", 56);
 					return false;
 				}
@@ -66,15 +66,15 @@ bool ZipMod::walk_dir(const std::string& startdir, const std::string& inputdir, 
 			else {
 				zip_source_t* source = zip_source_file(zipper, fullname.c_str(), 0, 0);
 				if (source == nullptr) {
-					//throw std::runtime_error("[YHMA] Failed to add file to zip: " + std::string(zip_strerror(zipper)));
-					Godot::print_error(std::format("[YHMA] Failed to add file to zip: {}", std::string(zip_strerror(zipper))).c_str(),
+					std::string s = std::format("[YHMA] Failed to add file to zip: {}", std::string(zip_strerror(zipper)));
+					Godot::print_error(s.c_str(),
 						"ZipMod::walk_dir", "ZipMod.cpp", 66);
 					return false;
 				}
 				if (zip_file_add(zipper, std::string(mod_folder + "/" + fullname.substr(startdir.length() + 1)).c_str(), source, ZIP_FL_ENC_UTF_8) < 0) {
 					zip_source_free(source);
-					//throw std::runtime_error("[YHMA] Failed to add file to zip: " + std::string(zip_strerror(zipper)));
-					Godot::print_error(std::format("[YHMA] Failed to add file to zip: {}", std::string(zip_strerror(zipper))).c_str(),
+					std::string s = std::format("[YHMA] Failed to add file to zip: {}", std::string(zip_strerror(zipper)));
+					Godot::print_error(s.c_str(),
 						"ZipMod::walk_dir", "ZipMod.cpp", 73);
 					return false;
 				}
