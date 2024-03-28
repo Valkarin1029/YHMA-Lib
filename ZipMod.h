@@ -23,7 +23,7 @@ public:
 	void _init();
 	static bool is_dir(const std::string& dir);
 	static bool walk_dir(const std::string& startdir, const std::string& inputdir, zip_t* zipper);
-	bool zipDirectory(String _input_dir, String _output_dir);
+	bool zipDirectory(String _input_dir, String _output_dir, bool _truncate);
 	void test(String f);
 
 };
