@@ -17,7 +17,6 @@ using namespace godot;
 void ZipMod::_register_methods()
 {
 	register_method("zipDirectory", &ZipMod::zipDirectory);
-	register_method("test", &ZipMod::test);
 }
 
 ZipMod::ZipMod()
@@ -124,14 +123,6 @@ bool ZipMod::zipDirectory(String _input_dir, String _output_dir, bool _truncate 
 	return true;
 }
 
-void godot::ZipMod::test(String f)
-{
-	std::string s = f.alloc_c_string();
 
-	std::string n = s.substr(s.rfind("/") + 1, s.length() - s.rfind("/"));
-
-	Godot::print(n.c_str());
-
-}
 
 
